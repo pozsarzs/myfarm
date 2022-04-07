@@ -1,0 +1,214 @@
+#!/usr/bin/perl
+# +----------------------------------------------------------------------------+
+# | MyFarm v0.3 * Web interface for remote monitoring MMxD devices             |
+# | Copyright (C) 2019-2022 Pozsár Zsolt <pozsar.zsolt@szerafingomba.hu>       |
+# | myfarm-client                                                              |
+# | Main program                                                               |
+# +----------------------------------------------------------------------------+
+#
+#   This program is free software: you can redistribute it and/or modify it
+# under the terms of the European Union Public License 1.1 version.
+#
+#   This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.
+
+use Data::UUID;
+use File::Compare;
+use WWW::Mechanize;
+use Switch;
+use strict;
+#use warnings;
+
+my $name = "MyFarm Client";
+my $version = "v0.3";
+my $tmpfile1 = "/tmp/myfarm-client-1.tmp";
+my $tmpfile2 = "/tmp/myfarm-client-2.tmp";
+my $uuid;
+my $cgi;
+my $type;
+my $conffile;
+my $datafile;
+my $lockfile;
+
+my @n;
+my $i;
+for $i (0..24)
+{
+  $n[$i] = "";
+}
+
+# load own configuration file
+sub loadmyfarmconf
+{
+  my $row;
+  my $colnum;
+  my ($inifile) = @_;
+  open CONF, "< $inifile" or die "ERROR: Cannot open $inifile file! \n";
+  while (<CONF>)
+  {
+    chop;
+    my(@columns) = split("=");
+    my($colnum) = $#columns;
+    $row = "";
+    foreach $colnum (@columns)
+    {
+      $row = $row . $colnum;
+    }
+    my(@datarow) = split("\"\"",$row);
+    my($datarownum) = $#datarow;
+    for $i (0..24)
+    {
+      if ($columns[0] eq "n$i" ) { $n[$i] = $columns[1]; }
+    }
+    switch ($columns[0])
+    {
+      case "cgi" { $cgi = $columns[1]; }
+      case "conffile" { $conffile = $columns[1]; }
+      case "type" { $type = $columns[1]; }
+      case "uuid" { $uuid = $columns[1]; }
+    }
+  }
+  close CONF;
+}
+
+# load configuration
+sub loadconf()
+{
+  my $row;
+  my $colnum;
+  my $dir_lck;
+  my $dir_log;
+  open CONF, "< $conffile" or die "ERROR: Cannot open $conffile configuration file!";
+  while (<CONF>)
+  {
+    chop;
+    my(@columns) = split("=");
+    my($colnum) = $#columns;
+    $row = "";
+    foreach $colnum (@columns)
+    {
+      $row = $row . $colnum;
+    }
+    my(@datarow) = split("\"\"",$row);
+    my($datarownum) = $#datarow;
+    switch ($columns[0])
+    {
+      case "dir_lck" { $dir_lck = $columns[1]; }
+      case "dir_log" { $dir_log = $columns[1]; }
+    }
+    close CONF;
+    $datafile = "$dir_log/mm3d.log";
+    $lockfile = "$dir_lck/mm3d.lock";
+  }
+}
+
+# create UUID
+sub createuuid()
+{
+  my $ug = Data::UUID -> new;
+  my $newuuid = $ug -> create_str();
+  print "$newuuid\n";
+  exit 0;
+}
+
+# UUID registration
+sub registration()
+{
+  my $mech = WWW::Mechanize -> new(agent => "$name/$version");
+  my $url = "$cgi?cmd=reg&uuid=$uuid";
+  $mech -> get($url);
+  print $mech -> content;
+  exit 0;
+}
+
+# UUID unregistration
+sub unregistration()
+{
+  my $mech = WWW::Mechanize -> new(agent => "$name/$version");
+  my $url = "$cgi?cmd=unreg&uuid=$uuid";
+  $mech -> get($url);
+  print $mech -> content;
+  exit 0;
+}
+
+# upload names
+sub uploadnames()
+{
+  my $mech = WWW::Mechanize->new(agent => "$name/$version");
+  my $url = "$cgi?cmd=name&uuid=$uuid";
+  for $i (0..24)
+  {
+    if ($n[$i] ne "") { $url = $url . "&$i=$n[$i]"; }
+  }
+  $mech -> get($url);
+  print $mech -> content;
+  exit 0;
+}
+
+# write usage
+sub showhelp()
+{
+  print "\n";
+  print "Usage:\n";
+  print "  $0 [parameters]\n";
+  print "\n";
+  print "Valid parameters:\n";
+  print "  -c                 create UUID and write into standard output\n";
+  print "  -h                 show usage of this script\n";
+  print "  -v                 show version information\n";
+  print "  --create-uuid      create UUID and write into standard output\n";
+  print "  --help             show usage of this script\n";
+  print "  --version          show version information\n";
+  print "\n";
+  print "  $0 [parameters] /path/myfarm.ini\n";
+  print "\n";
+  print "Valid parameters:\n";
+  print "  -d                 upload data to server\n";
+  print "  -n                 upload names to server\n";
+  print "  -r                 registrate your UUID\n";
+  print "  -u                 unregistrate your UUID\n";
+  print "  --registration     registrate your UUID\n";
+  print "  --unregistration   unregistrate your UUID\n";
+  print "  --upload-data      upload data to server\n";
+  print "  --upload-names     upload names to server\n";
+  print "\n";
+  exit 0;
+}
+
+# write version information
+sub showversion()
+{
+  print "$name $version\n";
+  exit 0;
+}
+# main function
+if ($#ARGV == 0)
+{
+  switch ($ARGV[0])
+  {
+    case  "-c"               { createuuid; }
+    case  "-h"               { showhelp; }
+    case  "-v"               { showversion; }
+    case  "--create-uuid"    { createuuid; }
+    case  "--help"           { showhelp; }
+    case  "--version"        { showversion; }
+  }
+}
+if ($#ARGV == 1)
+{
+  loadmyfarmconf($ARGV[1]);
+  switch ($ARGV[0])
+  {
+#    case  "-d"               { uploaddata; }
+    case  "-n"               { uploadnames; }
+    case  "-r"               { registration; }
+    case  "-u"               { unregistration; }
+    case  "--registration"   { registration; }
+    case  "--unregistration" { unregistration; }
+#    case  "--upload-data"    { uploaddata; }
+    case  "--upload-names"   { uploadnames; }
+  }
+}
+print "Use -h or --help to show valid command line parameters.\n";
+exit 1;
