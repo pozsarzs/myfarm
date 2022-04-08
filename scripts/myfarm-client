@@ -44,7 +44,7 @@ sub loadmyfarmconf
   my $row;
   my $colnum;
   my ($inifile) = @_;
-  open CONF, "< $inifile" or die "ERROR: Cannot open $inifile file! \n";
+  open CONF, "< $inifile" or die "ERROR: Cannot open " . $inifile . " file! \n";
   while (<CONF>)
   {
     chop;
@@ -59,7 +59,7 @@ sub loadmyfarmconf
     my($datarownum) = $#datarow;
     for $i (0..24)
     {
-      if ($columns[0] eq "n$i" ) { $n[$i] = $columns[1]; }
+      if ($columns[0] eq "n" . $i ) { $n[$i] = $columns[1]; }
     }
     switch ($columns[0])
     {
@@ -79,7 +79,7 @@ sub loadconf()
   my $colnum;
   my $dir_lck;
   my $dir_log;
-  open CONF, "< $conffile" or die "ERROR: Cannot open $conffile configuration file!";
+  open CONF, "< $conffile" or die "ERROR: Cannot open " . $conffile . "configuration file!";
   while (<CONF>)
   {
     chop;
@@ -97,10 +97,10 @@ sub loadconf()
       case "dir_lck" { $dir_lck = $columns[1]; }
       case "dir_log" { $dir_log = $columns[1]; }
     }
-    close CONF;
-    $datafile = "$dir_log/mm3d.log";
-    $lockfile = "$dir_lck/mm3d.lock";
   }
+  close CONF;
+  $datafile = $dir_log . "/" . $type . ".log";
+  $lockfile = $dir_lck . "/" . $type . ".lock";
 }
 
 # create UUID
@@ -108,15 +108,15 @@ sub createuuid()
 {
   my $ug = Data::UUID -> new;
   my $newuuid = $ug -> create_str();
-  print "$newuuid\n";
+  print $newuuid . "\n";
   exit 0;
 }
 
 # UUID registration
 sub registration()
 {
-  my $mech = WWW::Mechanize -> new(agent => "$name/$version");
-  my $url = "$cgi?cmd=reg&uuid=$uuid";
+  my $mech = WWW::Mechanize -> new(agent => $name . "/" . $version);
+  my $url = $cgi . "?cmd=reg&uuid=" . $uuid;
   $mech -> get($url);
   print $mech -> content;
   exit 0;
@@ -125,8 +125,8 @@ sub registration()
 # UUID unregistration
 sub unregistration()
 {
-  my $mech = WWW::Mechanize -> new(agent => "$name/$version");
-  my $url = "$cgi?cmd=unreg&uuid=$uuid";
+  my $mech = WWW::Mechanize -> new(agent => $name . "/" . $version);
+  my $url = $cgi . "?cmd=unreg&uuid=" . $uuid;
   $mech -> get($url);
   print $mech -> content;
   exit 0;
@@ -135,14 +135,90 @@ sub unregistration()
 # upload names
 sub uploadnames()
 {
-  my $mech = WWW::Mechanize->new(agent => "$name/$version");
-  my $url = "$cgi?cmd=name&uuid=$uuid";
+  loadconf;
+  my $mech = WWW::Mechanize -> new(agent => $name . "/" . $version);
+  my $url = $cgi . "?cmd=name&uuid=" . $uuid;
   for $i (0..24)
   {
-    if ($n[$i] ne "") { $url = $url . "&$i=$n[$i]"; }
+    if ($n[$i] ne "") { $url = $url . "&" . $i . "=" . $n[$i]; }
   }
   $mech -> get($url);
   print $mech -> content;
+  exit 0;
+}
+
+# upload data
+sub uploaddata()
+{
+  my $row;
+  my $colnum;
+  my $tmpstr;
+  my $s = "";
+  loadconf;
+  while (-e $lockfile)
+  {
+    sleep 1;
+  }
+  open DATA, "< $datafile" or die "ERROR: Cannot open " . $datafile . "data file!";
+  while (<DATA>)
+  {
+    chop;
+    my(@columns) = split(",");
+    my($colnum) = $#columns;
+    $row = "";
+    foreach $colnum (@columns)
+    {
+      $row = $row . $colnum;
+    }
+    my(@datarow) = split("\"\"",$row);
+    my($datarownum) = $#datarow;
+    for $i (2..15)
+    {
+      $s = $columns[$i];
+      if (($i < 8) && ($i > 3))
+      {
+       if ($s eq "0") {$s = "D"}
+       if ($s eq "1") {$s = "G"}
+      }
+      if (($i < 12) && ($i > 7))
+      {
+        if ($s eq "0") {$s = "D"}
+        if ($s eq "1") {$s = "Y"}
+      }
+      if (($i < 16) && ($i > 11))
+      {
+        if ($s eq "0") {$s = "D"}
+        if ($s eq "1") {$s = "Y"}
+      }
+      $tmpstr = $tmpstr . ($i+1) . "=" . $s;
+      if ($i < 15) { $tmpstr = $tmpstr . "&"; }
+    }
+    if ( -e $tmpfile1)
+    {
+      open(TMP2, '>', $tmpfile2);
+      print TMP2 $tmpstr;
+      close TMP2;
+      if (compare ($tmpfile1,$tmpfile2) != 0)
+      {
+        my $mech = WWW::Mechanize -> new(agent => $name . "/" . $version);
+        my $url = $cgi . "?cmd=value&uuid=" . $uuid . "&0=" . $n[0] . "&1=" . $columns[0] . "&2=" . $columns[1] . "&" . $tmpstr;
+        $mech -> get($url);
+        print $mech -> content;
+        rename ($tmpfile2,$tmpfile1);
+      }
+    } else
+    {
+      open(TMP1, '>', $tmpfile1);
+      print TMP1 $tmpstr;
+      close TMP1;
+      my $mech = WWW::Mechanize -> new(agent => $name . "/" . $version);
+      my $url = $cgi . "?cmd=value&uuid=" . $uuid . "&0=" . $n[0] . "&1=" . $columns[0] . "&2=" . $columns[1] . "&" . $tmpstr;
+      $mech -> get($url);
+      print $mech -> content;
+    }
+    last;
+  }
+  close DATA;
   exit 0;
 }
 
@@ -151,7 +227,7 @@ sub showhelp()
 {
   print "\n";
   print "Usage:\n";
-  print "  $0 [parameters]\n";
+  print "  " . $0 . " [parameters]\n";
   print "\n";
   print "Valid parameters:\n";
   print "  -c                 create UUID and write into standard output\n";
@@ -161,7 +237,7 @@ sub showhelp()
   print "  --help             show usage of this script\n";
   print "  --version          show version information\n";
   print "\n";
-  print "  $0 [parameters] /path/myfarm.ini\n";
+  print "  " . $0 . " [parameters] /path/myfarm.ini\n";
   print "\n";
   print "Valid parameters:\n";
   print "  -d                 upload data to server\n";
@@ -179,7 +255,7 @@ sub showhelp()
 # write version information
 sub showversion()
 {
-  print "$name $version\n";
+  print $name . $version . "\n";
   exit 0;
 }
 # main function
@@ -200,13 +276,13 @@ if ($#ARGV == 1)
   loadmyfarmconf($ARGV[1]);
   switch ($ARGV[0])
   {
-#    case  "-d"               { uploaddata; }
+    case  "-d"               { uploaddata; }
     case  "-n"               { uploadnames; }
     case  "-r"               { registration; }
     case  "-u"               { unregistration; }
     case  "--registration"   { registration; }
     case  "--unregistration" { unregistration; }
-#    case  "--upload-data"    { uploaddata; }
+    case  "--upload-data"    { uploaddata; }
     case  "--upload-names"   { uploadnames; }
   }
 }

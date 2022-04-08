@@ -30,31 +30,6 @@ my $green;
 my $i;
 my $lng = "hu";
 my $myfile;
-my $n0;
-my $n1;
-my $n10;
-my $n11;
-my $n12;
-my $n13;
-my $n14;
-my $n15;
-my $n16;
-my $n17;
-my $n18;
-my $n19;
-my $n2;
-my $n20;
-my $n21;
-my $n22;
-my $n23;
-my $n24;
-my $n3;
-my $n4;
-my $n5;
-my $n6;
-my $n7;
-my $n8;
-my $n9;
 my $name;
 my $pair;
 my @pairs;
@@ -67,6 +42,13 @@ my $uuid;
 my $value;
 my $yellow;
 my $texthtml = "Content-type:text/html\r\n\r\n";
+
+my @n;
+my $i;
+for $i (0..24)
+{
+  $n[$i] = "";
+}
 
 # get data from buffer
 $ENV{'REQUEST_METHOD'} =~ tr/a-z/A-Z/;
@@ -82,9 +64,9 @@ if ($ENV{'REQUEST_METHOD'} eq "GET")
 # - unregistering UUID
 # $buffer='cmd=unreg&uuid=be6c2eb6-8b2d-4115-9184-5f80a5ba723d';
 # - store names
-#$buffer='cmd=name&uuid=be6c2eb6-8b2d-4115-9184-5f80a5ba723d&0=TH01&1=datum&2=ido&3=T&4=RH&5=be 1&6=be 2&7=be 3&8=be 4&9=ki 1&10=ki 2&11=ki 3&12=ki 4&13=hiba 1&14=hiba 2&15=hiba 3&16=hiba 4';
+# $buffer='cmd=name&uuid=be6c2eb6-8b2d-4115-9184-5f80a5ba723d&0=TH01&1=datum&2=ido&3=T&4=RH&5=be 1&6=be 2&7=be 3&8=be 4&9=ki 1&10=ki 2&11=ki 3&12=ki 4&13=hiba 1&14=hiba 2&15=hiba 3&16=hiba 4';
 # - store values
-#$buffer='cmd=value&uuid=be6c2eb6-8b2d-4115-9184-5f80a5ba723d&0=TH01&1=2019-03-12&2=12:12&3=12&4=79&5=D&6=G&7=G&8=D&9=Y&10=Y&11=D&12=D&13=D&14=D&15=R&16=R';
+# $buffer='cmd=value&uuid=be6c2eb6-8b2d-4115-9184-5f80a5ba723d&0=TH01&1=2019-03-12&2=12:12&3=12&4=79&5=D&6=G&7=G&8=D&9=Y&10=Y&11=D&12=D&13=D&14=D&15=R&16=R';
 # - show data
 # $buffer='cmd=show&uuid=be6c2eb6-8b2d-4115-9184-5f80a5ba723d&lng=hu';
 
@@ -100,31 +82,10 @@ foreach $pair (@pairs)
 $cmd = $FORM{cmd};
 $uuid = substr(lc($FORM{uuid}),0,50);
 $lng = substr($FORM{lng},0,2);
-$n0 = substr($FORM{0},0,24);
-$n1 = substr($FORM{1},0,24);
-$n2 = substr($FORM{2},0,24);
-$n3 = substr($FORM{3},0,24);
-$n4 = substr($FORM{4},0,24);
-$n5 = substr($FORM{5},0,24);
-$n6 = substr($FORM{6},0,24);
-$n7 = substr($FORM{7},0,24);
-$n8 = substr($FORM{8},0,24);
-$n9 = substr($FORM{9},0,24);
-$n10 = substr($FORM{10},0,24);
-$n11 = substr($FORM{11},0,24);
-$n12 = substr($FORM{12},0,24);
-$n13 = substr($FORM{13},0,24);
-$n14 = substr($FORM{14},0,24);
-$n15 = substr($FORM{15},0,24);
-$n16 = substr($FORM{16},0,24);
-$n17 = substr($FORM{17},0,24);
-$n18 = substr($FORM{18},0,24);
-$n19 = substr($FORM{19},0,24);
-$n24 = substr($FORM{24},0,24);
-$n21 = substr($FORM{21},0,24);
-$n22 = substr($FORM{22},0,24);
-$n23 = substr($FORM{23},0,24);
-$n24 = substr($FORM{24},0,24);
+for $i (0..24)
+{
+  $n[$i] = substr($FORM{"$i"},0,24);
+}
 
 # select operation mode
 switch ($cmd)
@@ -160,12 +121,12 @@ switch ($cmd)
   # store name of growing house and lights
   case "name"
   {
-    if ( not -d "$rootdir/data/$uuid/$n0")
+    if ( not -d "$rootdir/data/$uuid/$n[0]")
     {
-      make_path("$rootdir/data/$uuid/$n0");
+      make_path("$rootdir/data/$uuid/$n[0]");
     }
-    open($myfile, '>', "$rootdir/data/$uuid/$n0/names.csv");
-    print $myfile "$n0,$n1,$n2,$n3,$n4,$n5,$n6,$n7,$n8,$n9,$n10,$n11,$n12,$n13,$n14,$n15,$n16,$n17,$n18,$n19,$n20,$n21,$n22,$n23,$n24\n";
+    open($myfile, '>', "$rootdir/data/$uuid/$n[0]/names.csv");
+    print $myfile "$n[0],$n[1],$n[2],$n[3],$n[4],$n[5],$n[6],$n[7],$n[8],$n[9],$n[10],$n[11],$n[12],$n[13],$n[14],$n[15],$n[16],$n[17],$n[18],$n[19],$n[20],$n[21],$n[22],$n[23],$n[24]\n";
     close $myfile;
     print $texthtml;
     print "Names are stored under $uuid UUID.\n";
@@ -173,12 +134,12 @@ switch ($cmd)
   # store values
   case "value"
   {
-    if ( not -d "$rootdir/data/$uuid/$n0")
+    if ( not -d "$rootdir/data/$uuid/$n[0]")
     {
-      make_path("$rootdir/data/$uuid/$n0");
+      make_path("$rootdir/data/$uuid/$n[0]");
     }
-    open($myfile, '>', "$rootdir/data/$uuid/$n0/values.csv");
-    print $myfile "$n0,$n1,$n2,$n3,$n4,$n5,$n6,$n7,$n8,$n9,$n10,$n11,$n12,$n13,$n14,$n15,$n16,$n17,$n18,$n19,$n20,$n21,$n22,$n23,$n24,\n";
+    open($myfile, '>', "$rootdir/data/$uuid/$n[0]/values.csv");
+    print $myfile "$n[0],$n[1],$n[2],$n[3],$n[4],$n[5],$n[6],$n[7],$n[8],$n[9],$n[10],$n[11],$n[12],$n[13],$n[14],$n[15],$n[16],$n[17],$n[18],$n[19],$n[20],$n[21],$n[22],$n[23],$n[24],\n";
     close $myfile;
     print $texthtml;
     print "Values are stored under $uuid UUID.\n";
