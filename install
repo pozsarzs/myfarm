@@ -25,6 +25,8 @@ SWV=`cat documents/VERSION`
 INSTDIR=/usr/local
 PRGDIR="myfarm-client"
 SUBDIRS="bin \
+         etc \
+         etc/myfarm \
          share \
          share/doc \
          share/doc/$PRGDIR \
@@ -55,6 +57,7 @@ do
   echo "  $INSTDIR/$D"
 done
 echo "- copying files:"
+copy "settings/$PRGDIR/*" "$INSTDIR/etc/$PRGDIR/"
 copy "documents/*" "$INSTDIR/share/doc/$PRGDIR/"
 copy "manuals/*" "$INSTDIR/share/man/man1/"
 copy "scripts/*" "$INSTDIR/bin/"

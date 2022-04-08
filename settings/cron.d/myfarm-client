@@ -3,14 +3,14 @@
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-*/10 * * * *			root	myfarm-client -d /etc/myfarm/myfarm-mm3d.ini >/dev/null 2>&1
-# */10 * * * *			root	myfarm-client -d /etc/myfarm/myfarm-mm5d.ini >/dev/null 2>&1
-# */10 * * * *			root	myfarm-client -d /etc/myfarm/myfarm-mm8d-ch0.ini >/dev/null 2>&1
-# */10 * * * *			root	myfarm-client -d /etc/myfarm/myfarm-mm8d-ch1.ini >/dev/null 2>&1
-# */10 * * * *			root	myfarm-client -d /etc/myfarm/myfarm-mm8d-ch2.ini >/dev/null 2>&1
+*/10 * * * *			root	myfarm-client -d /etc/myfarm-client/myfarm-mm3d.ini >/dev/null 2>&1
+# */10 * * * *			root	myfarm-client -d /etc/myfarm-client/myfarm-mm5d.ini >/dev/null 2>&1
+# */10 * * * *			root	myfarm-client -d /etc/myfarm-client/myfarm-mm8d-ch0.ini >/dev/null 2>&1
+# */10 * * * *			root	myfarm-client -d /etc/myfarm-client/myfarm-mm8d-ch1.ini >/dev/null 2>&1
+# */10 * * * *			root	myfarm-client -d /etc/myfarm-client/myfarm-mm8d-ch2.ini >/dev/null 2>&1
 
-# */10 * * * *			root	myfarm-client -d /usr/local/etc/myfarm/myfarm-mm3d.ini >/dev/null 2>&1
-# */10 * * * *			root	myfarm-client -d /usr/local/etc/myfarm/myfarm-mm5d.ini >/dev/null 2>&1
-# */10 * * * *			root	myfarm-client -d /usr/local/etc/myfarm/myfarm-mm8d-ch0.ini >/dev/null 2>&1
-# */10 * * * *			root	myfarm-client -d /usr/local/etc/myfarm/myfarm-mm8d-ch1.ini >/dev/null 2>&1
-# */10 * * * *			root	myfarm-client -d /usr/local/etc/myfarm/myfarm-mm8d-ch2.ini >/dev/null 2>&1
+# */10 * * * *			root	myfarm-client -d /usr/local/etc/myfarm-client/myfarm-mm3d.ini >/dev/null 2>&1
+# */10 * * * *			root	myfarm-client -d /usr/local/etc/myfarm-client/myfarm-mm5d.ini >/dev/null 2>&1
+# */10 * * * *			root	myfarm-client -d /usr/local/etc/myfarm-client/myfarm-mm8d-ch0.ini >/dev/null 2>&1
+# */10 * * * *			root	myfarm-client -d /usr/local/etc/myfarm-client/myfarm-mm8d-ch1.ini >/dev/null 2>&1
+# */10 * * * *			root	myfarm-client -d /usr/local/etc/myfarm-client/myfarm-mm8d-ch2.ini >/dev/null 2>&1
