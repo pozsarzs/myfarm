@@ -1,0 +1,64 @@
+#!/bin/bash
+# +----------------------------------------------------------------------------+
+# | MyFarm v0.3 * Web interface for remote monitoring MMxD devices             |
+# | Copyright (C) 2019-2022 Pozsár Zsolt <pozsar.zsolt@szerafingomba.hu>       |
+# | install                                                                    |
+# | Installer script                                                           |
+# +----------------------------------------------------------------------------+
+#
+#   This program is free software: you can redistribute it and/or modify it
+# under the terms of the European Union Public License 1.1 version.
+#
+#   This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.
+
+copy()
+{
+  sudo cp $1 $2
+  echo "  $1 -> $2"
+}
+
+# constans
+SWN="MyFarm Client"
+SWV=`cat documents/VERSION`
+INSTDIR=/usr/local
+PRGDIR="myfarm-client"
+SUBDIRS="bin \
+         share \
+         share/doc \
+         share/doc/$PRGDIR \
+         share/man \
+         share/man/man1"
+
+# installer
+clear
+echo "--------------------------------------------------------------------------------"
+echo "$SWN $SWV installer script"
+echo "Copyright (C) 2019-2022 Pozsár Zsolt <pozsar.zsolt@szerafingomba.hu>"
+echo "--------------------------------------------------------------------------------"
+echo "  This program is free software: you can redistribute it and/or modify it
+under the terms of the European Union Public License 1.1 version.
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE."
+echo "--------------------------------------------------------------------------------"
+sleep 3
+
+echo -e "\nInstalling..."
+echo "- creating directories:"
+sudo mkdir --parents $INSTDIR 2> /dev/null
+for D in $SUBDIRS
+do
+  sudo mkdir --parents $INSTDIR/$D 2> /dev/null
+  echo "  $INSTDIR/$D"
+done
+echo "- copying files:"
+copy "documents/*" "$INSTDIR/share/doc/$PRGDIR/"
+copy "manuals/*" "$INSTDIR/share/man/man1/"
+copy "scripts/*" "$INSTDIR/bin/"
+echo "- set cron.d:"
+copy "settings/cron.d/$PRGDIR" "/etc/cron.d/"
+sudo /etc/init.d/cron restart
+echo "Done."
