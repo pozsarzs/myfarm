@@ -188,7 +188,7 @@ sub uploaddata()
       if (($i < 16) && ($i > 11))
       {
         if ($s eq "0") {$s = "D"}
-        if ($s eq "1") {$s = "Y"}
+        if ($s eq "1") {$s = "R"}
       }
       $tmpstr = $tmpstr . ($i+1) . "=" . $s;
       if ($i < 15) { $tmpstr = $tmpstr . "&"; }
