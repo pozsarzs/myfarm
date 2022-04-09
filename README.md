@@ -7,7 +7,7 @@ GitHub: <https://github.com/pozsarzs/myfarm>
 
  - architecture:       (all)
  - operation system:   Linux
- - version:            v0.2
+ - version:            v0.3
  - language:           en, hu
  - licence:            EUPL v1.1
  - user interface:     CLI

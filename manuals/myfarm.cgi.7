@@ -1,0 +1,67 @@
+.TH "myfarm.cgi" "7" "0.3" "Pozsár Zsolt" "MyFarm"
+.SH "NAME"
+.LP 
+myfarm.cgi - CGI program
+.SH "SYNTAX"
+.LP
+\fBmyfarm.cgi\fP?cmd=reg&uuid=...
+.br
+\fBmyfarm.cgi\fP?cmd=unreg&uuid=...
+.br
+\fBmyfarm.cgi\fP?cmd=name&uuid=...&0=...&1=......&16=...
+.br
+\fBmyfarm.cgi\fP?cmd=value&uuid=...&0=...&1=......&16=...
+.br
+\fBmyfarm.cgi\fP?cmd=show&uuid=...&lng=..
+.SH "OPTIONS"
+.TP
+.BR cmd
+command
+.TP
+.BR uuid
+uniqe user ID (see configuration file)
+.TP
+.BR lng
+language
+.TP
+.BR 0-16
+number of name or value
+.SH "DESCRIPTION"
+.LP 
+The MyFarm service makes it easy to monitoring MM3D, MM5D and MM8D controllers
+installed in your farmhouses.
+.SH "FILES"
+.LP
+.TP
+\fIcgi-bin/myfarm.cgi\fR
+this program
+.TP
+\fImyfarm/data/4ba19f80-b57c-11ec-9c8e-b169981367c8/Tent 12/names.csv\fR
+example file: names of data
+.TP
+\fImyfarm/data/4ba19f80-b57c-11ec-9c8e-b169981367c8/Tent 12/values.csv\fR
+example file: values of data
+.TP
+\fImyfarm/footers/*.html\fR
+footer of generated webpage
+.TP
+\fImyfarm/headers/*.html\fR
+header of generated webpage
+.TP
+\fImyfarm/images/*\fR
+images of generated webpage
+.TP
+\fImyfarm.html\fR
+example startpage (HU)
+.TP
+\fIen_myfarm.html\fR
+example startpage (EN)
+.SH "HOMEPAGE"
+\fIhttp://www.szerafingomba.hu/softwares/\fR
+.SH "SEE ALSO"
+.PD 0
+.LP
+\fBmyfarm-client\fP(1)
+and \fI/usr/share/doc/myfarm/\fP or equivalent on your system.
+.SH "AUTHOR"
+Pozsár Zsolt \fIpozsar.zsolt@szerafingomba.hu\fR
