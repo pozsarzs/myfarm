@@ -1,0 +1,68 @@
+.TH "myfarm-client" "1" "0.3" "Pozsár Zsolt" "MyFarm"
+.SH "NAME"
+.LP 
+myfarm-client - client program
+.SH "SYNTAX"
+.LP
+\fBmyfarm-client\fP parameter
+.br
+\fBmyfarm-client\fP parameter configuration file
+.SH "DESCRIPTION"
+.LP 
+The MyFarm service makes it easy to monitoring MM3D, MM5D and MM8D controllers
+installed in your farmhouses.
+.SH "OPTIONS"
+.TP
+.BR \-c ", " \-\-create-uuid
+create UUID and write into standard output
+.TP
+.BR \-h ", " \-\-help
+show usage of this script
+.TP
+.BR \-v ", " \-\-version
+show version information
+.TP
+.BR
+.TP
+.BR \-r ", " \-\-registration
+registrate your UUID
+.TP
+.BR \-u ", " \-\-unregistration
+unregistrate your UUID
+.TP
+.BR \-d ", " \-\-upload-data
+upload data to server
+.TP
+.BR \-n ", " \-\-upload-names
+upload names to server
+
+.SH "FILES"
+.LP
+.TP
+\fI/etc/myfarm-client/myfarm-client-*.ini\fR or \fI/usr/local/etc/myfarm-client/myfarm-client-*.ini\fR
+configuration file
+.SH "EXIT STATUS"
+.TP
+.B 0
+normal exit
+.TP
+.B 1
+cannot open configuration file
+.TP
+.B 2
+bad controller type in configuration file
+.TP
+.B 3
+cannot open configuration file of controller
+.TP
+.B 4
+cannot open data file
+.SH "HOMEPAGE"
+\fIhttp://www.szerafingomba.hu/softwares/\fR
+.SH "SEE ALSO"
+.PD 0
+.LP
+\fBmmyfarm.cgi\fP(7)
+and \fI/usr/share/doc/mm8d/\fP or equivalent on your system.
+.SH "AUTHOR"
+Pozsár Zsolt \fIpozsar.zsolt@szerafingomba.hu\fR

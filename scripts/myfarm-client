@@ -45,38 +45,47 @@ sub loadmyfarmconf
 #  my $colnum;
   my $row;
   my ($inifile) = @_;
-  open CONF, "< $inifile" or die "ERROR: Cannot open " . $inifile . " file! \n";
-  while (<CONF>)
+  if (-e $inifile)
   {
-    chop;
-    my(@columns) = split("=");
-    my($colnum) = $#columns;
-    $row = "";
-    foreach $colnum (@columns)
+    open CONF, "< $inifile";
+    while (<CONF>)
     {
-      $row = $row . $colnum;
+      chop;
+      my(@columns) = split("=");
+      my($colnum) = $#columns;
+      $row = "";
+      foreach $colnum (@columns)
+      {
+        $row = $row . $colnum;
+      }
+      my(@datarow) = split("\"\"",$row);
+      my($datarownum) = $#datarow;
+      for $i (0..24)
+      {
+        if ($columns[0] eq "n" . $i ) { $n[$i] = $columns[1]; }
+      }
+      switch ($columns[0])
+      {
+        case "cgi"      { $cgi = $columns[1]; }
+        case "conffile" { $conffile = $columns[1]; }
+        case "type"     { $type = $columns[1]; }
+        case "uuid"     { $uuid = $columns[1]; }
+        case "channel"  { $channel = $columns[1]; }
+      }
     }
-    my(@datarow) = split("\"\"",$row);
-    my($datarownum) = $#datarow;
-    for $i (0..24)
+    close CONF;
+    $type = lc($type);
+    if (($type ne "mm3d") && ($type ne "mm5d") && ($type ne "mm8d"))
     {
-      if ($columns[0] eq "n" . $i ) { $n[$i] = $columns[1]; }
+      print "ERROR #2\n";
+      print "Type" . $type . "is not valid in " . $inifile . " configuration file.";
+      exit 2;
     }
-    switch ($columns[0])
-    {
-      case "cgi"      { $cgi = $columns[1]; }
-      case "conffile" { $conffile = $columns[1]; }
-      case "type"     { $type = $columns[1]; }
-      case "uuid"     { $uuid = $columns[1]; }
-      case "channel"  { $channel = $columns[1]; }
-    }
-  }
-  close CONF;
-  $type = lc($type);
-  if (($type ne "mm3d") && ($type ne "mm5d") && ($type ne "mm8d"))
+  } else
   {
-    print "ERROR: Type" . $type . "is not valid in " . $inifile . " configuration file.";
-    exit 2;
+    print "ERROR #1\n";
+    print "Cannot open ",$inifile," configuration file!\n";
+    exit 1;
   }
 }
 
@@ -88,34 +97,42 @@ sub loadconf()
   my $dir_lck;
   my $dir_log;
   my $row;
-  open CONF, "< $conffile" or die "ERROR: Cannot open " . $conffile . " configuration file!";
-  while (<CONF>)
+  if (-e $conffile)
   {
-    chop;
-    my(@columns) = split("=");
-    my($colnum) = $#columns;
-    $row = "";
-    foreach $colnum (@columns)
+    open CONF, "< $conffile";
+    while (<CONF>)
     {
-      $row = $row . $colnum;
+      chop;
+      my(@columns) = split("=");
+      my($colnum) = $#columns;
+      $row = "";
+      foreach $colnum (@columns)
+      {
+        $row = $row . $colnum;
+      }
+      my(@datarow) = split("\"\"",$row);
+      my($datarownum) = $#datarow;
+      switch ($columns[0])
+      {
+        case "dir_lck" { $dir_lck = $columns[1]; }
+        case "dir_log" { $dir_log = $columns[1]; }
+      }
     }
-    my(@datarow) = split("\"\"",$row);
-    my($datarownum) = $#datarow;
-    switch ($columns[0])
+    close CONF;
+    if ($type eq "mm8d")
     {
-      case "dir_lck" { $dir_lck = $columns[1]; }
-      case "dir_log" { $dir_log = $columns[1]; }
+      $datafile = $dir_log . "/" . $type . "-ch" . $channel . ".log";
+      $lockfile = $dir_lck . "/" . $type . ".lock";
+    } else
+    {
+      $datafile = $dir_log . "/" . $type . ".log";
+      $lockfile = $dir_lck . "/" . $type . ".lock";
     }
-  }
-  close CONF;
-  if ($type eq "mm8d")
-  {
-    $datafile = $dir_log . "/" . $type . "-ch" . $channel . ".log";
-    $lockfile = $dir_lck . "/" . $type . ".lock";
   } else
   {
-    $datafile = $dir_log . "/" . $type . ".log";
-    $lockfile = $dir_lck . "/" . $type . ".lock";
+    print "ERROR #3\n";
+    print "Cannot open ",$conffile," configuration file!\n";
+    exit 3;
   }
 }
 
@@ -184,126 +201,134 @@ sub uploaddata()
   {
     sleep 1;
   }
-  open DATA, "< $datafile" or die "ERROR: Cannot open " . $datafile . " data file!";
-  while (<DATA>)
+  if (-e $datafile)
   {
-    chop;
-    my(@columns) = split(",");
-    my($colnum) = $#columns;
-    $row = "";
-    foreach $colnum (@columns)
+    open DATA, "< $datafile";
+    while (<DATA>)
     {
-      $row = $row . $colnum;
-    }
-    my(@datarow) = split("\"\"",$row);
-    my($datarownum) = $#datarow;
-    if ($type eq "mm8d")
-    {
-      if ($channel eq "0")
+      chop;
+      my(@columns) = split(",");
+      my($colnum) = $#columns;
+      $row = "";
+      foreach $colnum (@columns)
       {
-        #     0        1   2 3 4 5  6 7 8
-        # 2020-09-19,13:15,0,0,0,31,0,0,0
-        #                  R R R    Y Y Y
-        for $i (2..8)
+        $row = $row . $colnum;
+      }
+      my(@datarow) = split("\"\"",$row);
+      my($datarownum) = $#datarow;
+      if ($type eq "mm8d")
+      {
+        if ($channel eq "0")
         {
-          $s = $columns[$i];
-          if (($i < 9) && ($i > 5))
+          #     0        1   2 3 4 5  6 7 8
+          # 2020-09-19,13:15,0,0,0,31,0,0,0
+          #                  R R R    Y Y Y
+          for $i (2..8)
           {
-            if ($s eq "0") {$s = "D"}
-            if ($s eq "1") {$s = "Y"}
+            $s = $columns[$i];
+            if (($i < 9) && ($i > 5))
+            {
+              if ($s eq "0") {$s = "D"}
+              if ($s eq "1") {$s = "Y"}
+            }
+            if (($i < 5) && ($i > 1))
+            {
+              if ($s eq "0") {$s = "D"}
+              if ($s eq "1") {$s = "R"}
+            }
+            $tmpstr = $tmpstr . ($i+1) . "=" . $s;
+            if ($i < 8) { $tmpstr = $tmpstr . "&"; }
           }
-          if (($i < 5) && ($i > 1))
+        } else
+        { 
+          #                                    1 1
+          #     0        1   2  3  4 5 6 7 8 9 0 1
+          # 2020-09-19,13:59,13,88,3,1,1,1,0,1,1,1
+          #                          H Y R R Y Y Y
+          #                          M
+          for $i (2..11)
           {
-            if ($s eq "0") {$s = "D"}
-            if ($s eq "1") {$s = "R"}
+            $s = $columns[$i];
+            if ($i == 5)
+            {
+             if ($s eq "0") {$s = "H"}
+             if ($s eq "1") {$s = "M"}
+            }
+            if (($i == 6 ) || ($i > 8))
+            {
+              if ($s eq "0") {$s = "D"}
+              if ($s eq "1") {$s = "Y"}
+            }
+            if (($i < 9) && ($i > 6))
+            {
+              if ($s eq "0") {$s = "D"}
+              if ($s eq "1") {$s = "R"}
+            }
+            $tmpstr = $tmpstr . ($i+1) . "=" . $s;
+            if ($i < 11) { $tmpstr = $tmpstr . "&"; }
           }
-          $tmpstr = $tmpstr . ($i+1) . "=" . $s;
-          if ($i < 8) { $tmpstr = $tmpstr . "&"; }
         }
       } else
-      { 
-        #                                    1 1
-        #     0        1   2  3  4 5 6 7 8 9 0 1
-        # 2020-09-19,13:59,13,88,3,1,1,1,0,1,1,1
-        #                          H Y R R Y Y Y
-        #                          M
-        for $i (2..11)
+      {
+        #                                        1 1 1 1 1 1
+        #     0        1     2    3  4 5 6 7 8 9 0 1 2 3 4 5
+        # 2022-04-09,16:30,14.0,91.0,0,1,0,0,0,1,0,1,0,0,0,0
+        #                            G G G G Y Y Y Y R R R R
+        for $i (2..15)
         {
           $s = $columns[$i];
-          if ($i == 5)
+          if (($i < 8) && ($i > 3))
           {
-           if ($s eq "0") {$s = "H"}
-           if ($s eq "1") {$s = "M"}
+           if ($s eq "0") {$s = "D"}
+           if ($s eq "1") {$s = "G"}
           }
-          if (($i == 6 ) || ($i > 8))
+          if (($i < 12) && ($i > 7))
           {
             if ($s eq "0") {$s = "D"}
             if ($s eq "1") {$s = "Y"}
           }
-          if (($i < 9) && ($i > 6))
+          if (($i < 16) && ($i > 11))
           {
             if ($s eq "0") {$s = "D"}
             if ($s eq "1") {$s = "R"}
           }
           $tmpstr = $tmpstr . ($i+1) . "=" . $s;
-          if ($i < 11) { $tmpstr = $tmpstr . "&"; }
+          if ($i < 15) { $tmpstr = $tmpstr . "&"; }
         }
       }
-    } else
-    {
-      #                                        1 1 1 1 1 1
-      #     0        1     2    3  4 5 6 7 8 9 0 1 2 3 4 5
-      # 2022-04-09,16:30,14.0,91.0,0,1,0,0,0,1,0,1,0,0,0,0
-      #                            G G G G Y Y Y Y R R R R
-      for $i (2..15)
+      if ( -e $tmpfile1)
       {
-        $s = $columns[$i];
-        if (($i < 8) && ($i > 3))
+        open(TMP2, '>', $tmpfile2);
+        print TMP2 $tmpstr;
+        close TMP2;
+        if (compare ($tmpfile1,$tmpfile2) != 0)
         {
-         if ($s eq "0") {$s = "D"}
-         if ($s eq "1") {$s = "G"}
+          my $mech = WWW::Mechanize -> new(agent => $name . "/" . $version);
+          my $url = $cgi . "?cmd=value&uuid=" . $uuid . "&0=" . $n[0] . "&1=" . $columns[0] . "&2=" . $columns[1] . "&" . $tmpstr;
+          $mech -> get($url);
+          print $mech -> content;
+          rename ($tmpfile2,$tmpfile1);
         }
-        if (($i < 12) && ($i > 7))
-        {
-          if ($s eq "0") {$s = "D"}
-          if ($s eq "1") {$s = "Y"}
-        }
-        if (($i < 16) && ($i > 11))
-        {
-          if ($s eq "0") {$s = "D"}
-          if ($s eq "1") {$s = "R"}
-        }
-        $tmpstr = $tmpstr . ($i+1) . "=" . $s;
-        if ($i < 15) { $tmpstr = $tmpstr . "&"; }
-      }
-    }
-    if ( -e $tmpfile1)
-    {
-      open(TMP2, '>', $tmpfile2);
-      print TMP2 $tmpstr;
-      close TMP2;
-      if (compare ($tmpfile1,$tmpfile2) != 0)
+      } else
       {
+        open(TMP1, '>', $tmpfile1);
+        print TMP1 $tmpstr;
+        close TMP1;
         my $mech = WWW::Mechanize -> new(agent => $name . "/" . $version);
         my $url = $cgi . "?cmd=value&uuid=" . $uuid . "&0=" . $n[0] . "&1=" . $columns[0] . "&2=" . $columns[1] . "&" . $tmpstr;
         $mech -> get($url);
         print $mech -> content;
-        rename ($tmpfile2,$tmpfile1);
       }
-    } else
-    {
-      open(TMP1, '>', $tmpfile1);
-      print TMP1 $tmpstr;
-      close TMP1;
-      my $mech = WWW::Mechanize -> new(agent => $name . "/" . $version);
-      my $url = $cgi . "?cmd=value&uuid=" . $uuid . "&0=" . $n[0] . "&1=" . $columns[0] . "&2=" . $columns[1] . "&" . $tmpstr;
-      $mech -> get($url);
-      print $mech -> content;
+      last;
     }
-    last;
+    close DATA;
+    exit 0;
+  } else
+  {
+    print "ERROR #3\n";
+    print "Cannot open ",$datafile," data file!\n";
+    exit 4;
   }
-  close DATA;
-  exit 0;
 }
 
 # write usage
@@ -371,4 +396,4 @@ if ($#ARGV == 1)
   }
 }
 print "Use -h or --help to show valid command line parameters.\n";
-exit 1;
+exit 0;
