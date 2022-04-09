@@ -1,0 +1,33 @@
+MyFarm - Web interface for remote monitoring MM3D, MM5D and MM8D devices
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. About software
+-----------------
+  The MyFarm service makes it easy to monitoring MM3D, MM5D and MM8D controllers
+installed in your farmhouses.
+
+
+2. How to get installer package for my OS?
+------------------------------------------
+a. Visit homepage (see later) to download installer package:
+
+   Linux:                myfarm-0.3-noarch.tar.gz
+
+b. Download from Github
+
+  $ git clone https://github.com/pozsarzs/myfarm.git
+
+3. Contact
+----------
+   Homepage:             <http://www.szerafingomba.hu/softwares/>
+   Author:               Pozsár Zsolt
+   E-mail:               <pozsar.zsolt@szerafingomba.hu>
+   Phone:                +36 56/470-272
+   Mobile:               +36 30/249-5030
+   Postal address:       Pozsár Zsolt
+                         Kurázsi Fő út 1.
+                         HU-5430 Tiszaföldvár
+                         Hungary
+
+--------------------------------------------------------------------------------
+ MyFarm * Copyright (C) 2019-2022 Pozsár Zsolt <pozsar.zsolt@szerafingomba.hu>

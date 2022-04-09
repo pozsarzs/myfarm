@@ -1,0 +1,19 @@
+ MyFarm (0.3) unstable; urgency=low
+
+  * Rewritten CGI and client programs.
+
+ -- Pozsár Zsolt <pozsar.zsolt@szerafingomba.hu>  Sat, 09 Apr 2022 22:00:00
+
+
+ MyFarm (0.2) unstable; urgency=low
+
+  * Some bugfixes.
+
+ -- Pozsár Zsolt <pozsar.zsolt@szerafingomba.hu>  Thu, 12 Dec 2019 06:00:00
+
+
+ MyFarm (0.1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Pozsár Zsolt <pozsar.zsolt@szerafingomba.hu>  Thu, 05 Dec 2019 06:00:00

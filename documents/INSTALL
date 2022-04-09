@@ -1,0 +1,26 @@
+Installation instruction for client program
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Installation
+------------
+  $ tar -xzf myfarm-client-0.3-noarch.tar.gz
+  $ cd myfarm-client
+  $ ./prepare
+  $ ./install
+
+Configuration
+-------------
+  $ myfarm-client --create-uuid
+
+  Please, insert UUID to mm8d-client*.ini files.
+
+  $ myfarm-client --registration
+  $ myfarm-client --upload-names
+
+Removing
+--------
+  $ cd myfarm-client
+  $ ./uninstall
+
+--------------------------------------------------------------------------------
+ MyFarm * Copyright (C) 2019-2022 Pozsár Zsolt <pozsar.zsolt@szerafingomba.hu>

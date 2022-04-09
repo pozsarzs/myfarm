@@ -22,14 +22,15 @@ use strict;
 
 my $name = "MyFarm Client";
 my $version = "v0.3";
-my $tmpfile1 = "/tmp/myfarm-client-1.tmp";
-my $tmpfile2 = "/tmp/myfarm-client-2.tmp";
-my $uuid;
 my $cgi;
-my $type;
+my $channel;
 my $conffile;
 my $datafile;
 my $lockfile;
+my $tmpfile1;
+my $tmpfile2;
+my $type;
+my $uuid;
 
 my @n;
 my $i;
@@ -41,8 +42,8 @@ for $i (0..24)
 # load own configuration file
 sub loadmyfarmconf
 {
+#  my $colnum;
   my $row;
-  my $colnum;
   my ($inifile) = @_;
   open CONF, "< $inifile" or die "ERROR: Cannot open " . $inifile . " file! \n";
   while (<CONF>)
@@ -63,23 +64,31 @@ sub loadmyfarmconf
     }
     switch ($columns[0])
     {
-      case "cgi" { $cgi = $columns[1]; }
+      case "cgi"      { $cgi = $columns[1]; }
       case "conffile" { $conffile = $columns[1]; }
-      case "type" { $type = $columns[1]; }
-      case "uuid" { $uuid = $columns[1]; }
+      case "type"     { $type = $columns[1]; }
+      case "uuid"     { $uuid = $columns[1]; }
+      case "channel"  { $channel = $columns[1]; }
     }
   }
   close CONF;
+  $type = lc($type);
+  if (($type ne "mm3d") && ($type ne "mm5d") && ($type ne "mm8d"))
+  {
+    print "ERROR: Type" . $type . "is not valid in " . $inifile . " configuration file.";
+    exit 2;
+  }
 }
 
 # load configuration
 sub loadconf()
 {
-  my $row;
+#  my $channel;
   my $colnum;
   my $dir_lck;
   my $dir_log;
-  open CONF, "< $conffile" or die "ERROR: Cannot open " . $conffile . "configuration file!";
+  my $row;
+  open CONF, "< $conffile" or die "ERROR: Cannot open " . $conffile . " configuration file!";
   while (<CONF>)
   {
     chop;
@@ -99,8 +108,15 @@ sub loadconf()
     }
   }
   close CONF;
-  $datafile = $dir_log . "/" . $type . ".log";
-  $lockfile = $dir_lck . "/" . $type . ".lock";
+  if ($type eq "mm8d")
+  {
+    $datafile = $dir_log . "/" . $type . "-ch" . $channel . ".log";
+    $lockfile = $dir_lck . "/" . $type . ".lock";
+  } else
+  {
+    $datafile = $dir_log . "/" . $type . ".log";
+    $lockfile = $dir_lck . "/" . $type . ".lock";
+  }
 }
 
 # create UUID
@@ -150,16 +166,25 @@ sub uploadnames()
 # upload data
 sub uploaddata()
 {
-  my $row;
   my $colnum;
-  my $tmpstr;
+  my $row;
   my $s = "";
+  my $tmpstr;
   loadconf;
+  if ($type eq "mm8d")
+  {
+    $tmpfile1 = "/tmp/myfarm-client-" . $type . "-" . $channel . "-1.tmp";
+    $tmpfile2 = "/tmp/myfarm-client-" . $type . "-" . $channel . "-2.tmp";
+  } else
+  {
+    $tmpfile1 = "/tmp/myfarm-client-" . $type . "-1.tmp";
+    $tmpfile2 = "/tmp/myfarm-client-" . $type . "-2.tmp";
+  }
   while (-e $lockfile)
   {
     sleep 1;
   }
-  open DATA, "< $datafile" or die "ERROR: Cannot open " . $datafile . "data file!";
+  open DATA, "< $datafile" or die "ERROR: Cannot open " . $datafile . " data file!";
   while (<DATA>)
   {
     chop;
@@ -172,26 +197,85 @@ sub uploaddata()
     }
     my(@datarow) = split("\"\"",$row);
     my($datarownum) = $#datarow;
-    for $i (2..15)
+    if ($type eq "mm8d")
     {
-      $s = $columns[$i];
-      if (($i < 8) && ($i > 3))
+      if ($channel eq "0")
       {
-       if ($s eq "0") {$s = "D"}
-       if ($s eq "1") {$s = "G"}
+        #     0        1   2 3 4 5  6 7 8
+        # 2020-09-19,13:15,0,0,0,31,0,0,0
+        #                  R R R    Y Y Y
+        for $i (2..8)
+        {
+          $s = $columns[$i];
+          if (($i < 9) && ($i > 5))
+          {
+            if ($s eq "0") {$s = "D"}
+            if ($s eq "1") {$s = "Y"}
+          }
+          if (($i < 5) && ($i > 1))
+          {
+            if ($s eq "0") {$s = "D"}
+            if ($s eq "1") {$s = "R"}
+          }
+          $tmpstr = $tmpstr . ($i+1) . "=" . $s;
+          if ($i < 8) { $tmpstr = $tmpstr . "&"; }
+        }
+      } else
+      { 
+        #                                    1 1
+        #     0        1   2  3  4 5 6 7 8 9 0 1
+        # 2020-09-19,13:59,13,88,3,1,1,1,0,1,1,1
+        #                          H Y R R Y Y Y
+        #                          M
+        for $i (2..11)
+        {
+          $s = $columns[$i];
+          if ($i == 5)
+          {
+           if ($s eq "0") {$s = "H"}
+           if ($s eq "1") {$s = "M"}
+          }
+          if (($i == 6 ) || ($i > 8))
+          {
+            if ($s eq "0") {$s = "D"}
+            if ($s eq "1") {$s = "Y"}
+          }
+          if (($i < 9) && ($i > 6))
+          {
+            if ($s eq "0") {$s = "D"}
+            if ($s eq "1") {$s = "R"}
+          }
+          $tmpstr = $tmpstr . ($i+1) . "=" . $s;
+          if ($i < 11) { $tmpstr = $tmpstr . "&"; }
+        }
       }
-      if (($i < 12) && ($i > 7))
+    } else
+    {
+      #                                        1 1 1 1 1 1
+      #     0        1     2    3  4 5 6 7 8 9 0 1 2 3 4 5
+      # 2022-04-09,16:30,14.0,91.0,0,1,0,0,0,1,0,1,0,0,0,0
+      #                            G G G G Y Y Y Y R R R R
+      for $i (2..15)
       {
-        if ($s eq "0") {$s = "D"}
-        if ($s eq "1") {$s = "Y"}
+        $s = $columns[$i];
+        if (($i < 8) && ($i > 3))
+        {
+         if ($s eq "0") {$s = "D"}
+         if ($s eq "1") {$s = "G"}
+        }
+        if (($i < 12) && ($i > 7))
+        {
+          if ($s eq "0") {$s = "D"}
+          if ($s eq "1") {$s = "Y"}
+        }
+        if (($i < 16) && ($i > 11))
+        {
+          if ($s eq "0") {$s = "D"}
+          if ($s eq "1") {$s = "R"}
+        }
+        $tmpstr = $tmpstr . ($i+1) . "=" . $s;
+        if ($i < 15) { $tmpstr = $tmpstr . "&"; }
       }
-      if (($i < 16) && ($i > 11))
-      {
-        if ($s eq "0") {$s = "D"}
-        if ($s eq "1") {$s = "R"}
-      }
-      $tmpstr = $tmpstr . ($i+1) . "=" . $s;
-      if ($i < 15) { $tmpstr = $tmpstr . "&"; }
     }
     if ( -e $tmpfile1)
     {
@@ -227,7 +311,7 @@ sub showhelp()
 {
   print "\n";
   print "Usage:\n";
-  print "  " . $0 . " [parameters]\n";
+  print "  " . $0 . " [parameter]\n";
   print "\n";
   print "Valid parameters:\n";
   print "  -c                 create UUID and write into standard output\n";
@@ -237,7 +321,7 @@ sub showhelp()
   print "  --help             show usage of this script\n";
   print "  --version          show version information\n";
   print "\n";
-  print "  " . $0 . " [parameters] /path/myfarm.ini\n";
+  print "  " . $0 . " [parameter] /path/myfarm.ini\n";
   print "\n";
   print "Valid parameters:\n";
   print "  -d                 upload data to server\n";
