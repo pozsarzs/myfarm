@@ -61,10 +61,10 @@ echo "- copying files:"
 copy "settings/$PRGDIR/*" "$INSTDIR/etc/$PRGDIR/"
 copy "documents/*" "$INSTDIR/share/doc/$PRGDIR/"
 copy "manuals/$PRGDIR.1" "$INSTDIR/share/man/man1/"
-copy "manuals/myfarm.7" "$INSTDIR/share/man/man7/"
+copy "manuals/myfarm.cgi.7" "$INSTDIR/share/man/man7/"
 copy "scripts/*" "$INSTDIR/bin/"
 echo "- set cron.d:"
 copy "settings/cron.d/$PRGDIR" "/etc/cron.d/"
-sudo $EDITOR /etc/cron.d/$PRGDIR
+sudo editor /etc/cron.d/$PRGDIR
 sudo /etc/init.d/cron restart
 echo "Done."
