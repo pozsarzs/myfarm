@@ -244,15 +244,15 @@ sub uploaddata()
           #                                    1 1
           #     0        1   2  3  4 5 6 7 8 9 0 1
           # 2020-09-19,13:59,13,88,3,1,1,1,0,1,1,1
-          #                          H Y R R Y Y Y
-          #                          M
+          #                          M Y R R Y Y Y
+          #                          H
           for $i (2..11)
           {
             $s = $columns[$i];
             if ($i == 5)
             {
-             if ($s eq "0") {$s = "H"}
-             if ($s eq "1") {$s = "M"}
+             if ($s eq "0") {$s = "M"}
+             if ($s eq "1") {$s = "H"}
             }
             if (($i == 6 ) || ($i > 8))
             {
