@@ -10,4 +10,5 @@ GitHub: <https://github.com/pozsarzs/myfarm>
  - version:            v0.3
  - language:           en, hu
  - licence:            EUPL v1.1
- - user interface:     CLI
+ - user interface:     CLI, WUI
+ - remote access:      HTTP
