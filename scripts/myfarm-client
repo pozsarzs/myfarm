@@ -268,7 +268,41 @@ sub uploaddata()
             if ($i < 11) { $tmpstr = $tmpstr . "&"; }
           }
         }
-      } else
+      }
+      if ($type eq "mm5d")
+      {
+        #                                      1 1 1 1 1 1
+        #     0        1   2  3  4 5 6 7 8 9 0 1 2 3 4 5 6
+        # 2022-04-09,16:30,14,91,H,0,1,0,0,0,1,0,1,0,0,0,0
+        #                          G G G G Y Y Y Y R R R R
+        for $i (2..16)
+        {
+          $s = $columns[$i];
+          if ($i == 4)
+          {
+           if ($s eq "0") {$s = "M"}
+           if ($s eq "1") {$s = "H"}
+          }
+          if (($i < 9) && ($i > 4))
+          {
+           if ($s eq "0") {$s = "D"}
+           if ($s eq "1") {$s = "G"}
+          }
+          if (($i < 13) && ($i > 8))
+          {
+            if ($s eq "0") {$s = "D"}
+            if ($s eq "1") {$s = "Y"}
+          }
+          if (($i < 17) && ($i > 12))
+          {
+            if ($s eq "0") {$s = "D"}
+            if ($s eq "1") {$s = "R"}
+          }
+          $tmpstr = $tmpstr . ($i+1) . "=" . $s;
+          if ($i < 16) { $tmpstr = $tmpstr . "&"; }
+        }
+      }
+      if ($type eq "mm3d")
       {
         #                                        1 1 1 1 1 1
         #     0        1     2    3  4 5 6 7 8 9 0 1 2 3 4 5
